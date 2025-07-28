@@ -1,63 +1,125 @@
-# Civic Blockchain Platform - Server
+# Transparent Governance Platform - Ballerina Backend
 
-Express.js backend API for the Civic Blockchain Platform.
+This is the backend server for the Transparent Governance Platform, built using the Ballerina programming language.
 
-## 🚀 Development
+## Features
+
+- RESTful API endpoints for governance operations
+- Authentication and user management
+- Voting system for proposals
+- Government spending tracking
+- Blockchain integration (planned)
+- MongoDB integration (planned)
+
+## Prerequisites
+
+- Ballerina 2201.12.7 or later
+- MongoDB (for database operations)
+- Java 11 or later (required by Ballerina)
+
+## Installation
+
+1. Ensure Ballerina is installed:
+   ```bash
+   bal version
+   ```
+
+2. Install dependencies:
+   ```bash
+   bal build
+   ```
+
+## Running the Server
+
+1. Start the server:
+   ```bash
+   bal run
+   ```
+
+2. The server will start on port 9090 by default. You can verify it's running by accessing:
+   ```
+   http://localhost:9090/api/health
+   ```
+
+## Configuration
+
+Configure the server by editing the `Config.toml` file:
+
+- `serverPort`: Port number for the server (default: 9090)
+- `allowedOrigin`: CORS allowed origin (default: "http://localhost:3000")
+- MongoDB settings (for future implementation)
+- JWT settings (for future implementation)
+- Blockchain settings (for future implementation)
+
+## API Endpoints
+
+### Health Check
+- `GET /api/health` - Server health status
+
+### Authentication
+- `POST /api/auth/login` - User login
+- `POST /api/auth/register` - User registration
+
+### Users
+- `GET /api/users/{userId}` - Get user by ID
+
+### Voting
+- `GET /api/voting/proposals` - Get all voting proposals
+- `POST /api/voting/proposals` - Create a new proposal
+- `POST /api/voting/proposals/{proposalId}/vote` - Vote on a proposal
+
+### Spending
+- `GET /api/spending/projects` - Get all spending projects
+- `POST /api/spending/projects` - Create a new spending project
+
+### Blockchain
+- `GET /api/blockchain/blocks` - Get blockchain blocks
+
+## Development
+
+### Project Structure
+
+- `main.bal` - Main server file with HTTP service definitions
+- `types.bal` - Type definitions for data models
+- `database.bal` - Database operations (currently mock implementations)
+- `Config.toml` - Configuration file
+- `Ballerina.toml` - Project configuration
+
+### Building
 
 ```bash
-# Install dependencies
-pnpm install
-
-# Start development server (with nodemon)
-pnpm dev
-
-# Build for production
-pnpm build
-
-# Start production server
-pnpm start
-
-# Run database migrations
-pnpm migrate
-
-# Run tests
-pnpm test
+bal build
 ```
 
-## 📁 Structure
+### Running in Development Mode
 
-```
-src/
-├── routes/              # API route handlers
-├── controllers/         # Business logic controllers
-├── models/              # Database models
-├── middleware/          # Express middleware
-├── services/            # External service integrations
-├── blockchain/          # Blockchain integration
-├── database/            # Database configuration & seeds
-├── utils/               # Utility functions
-└── config/              # Configuration files
+```bash
+bal run
 ```
 
-## 🔧 Configuration
+## TODO
 
-Create `.env`:
+- [ ] Implement actual MongoDB integration using `ballerinax/mongodb`
+- [ ] Add JWT authentication and authorization
+- [ ] Implement blockchain integration for vote verification
+- [ ] Add input validation and error handling
+- [ ] Add rate limiting and security features
+- [ ] Add comprehensive logging
+- [ ] Add unit tests
+- [ ] Add API documentation
+- [ ] Add Docker support
 
-```env
-NODE_ENV=development
-PORT=5000
-CLIENT_URL=http://localhost:3000
-DATABASE_URL=postgresql://username:password@localhost:5432/civic_blockchain
-REDIS_URL=redis://localhost:6379
-JWT_SECRET=your-jwt-secret-here
-BLOCKCHAIN_RPC_URL=your-blockchain-rpc-url
-```
+## Migration from Node.js
 
-## 📦 Key Dependencies
+This Ballerina backend replaces the previous Node.js/Express backend. The API endpoints maintain compatibility with the frontend client, but the implementation has been rewritten in Ballerina for better integration capabilities and cloud-native features.
 
-- Express.js
-- TypeScript
-- Prisma (Database ORM)
-- JWT (Authentication)
-- Winston (Logging)
-- Ethers/Web3 (Blockchain)
+### Changes Made:
+
+1. **Technology Stack**: Migrated from Node.js/Express to Ballerina
+2. **Database**: Prepared for MongoDB integration (currently using mock data)
+3. **Type Safety**: Enhanced type definitions with Ballerina's strong typing
+4. **CORS**: Built-in CORS support with Ballerina HTTP service
+5. **Error Handling**: Ballerina's built-in error handling patterns
+6. **Configuration**: Externalized configuration using Config.toml
+
+The API contract remains the same, so the frontend should work without modifications.

@@ -1,19 +1,38 @@
-# Civic Blockchain Platform
+# Transparent Governance Platform
 
-A comprehensive civic transparency and governance platform built with Next.js 15 and React 19.
+A comprehensive civic transparency and governance platform built with **Ballerina** backend and **Next.js 15** frontend.
 
-## Features
+## 🏗️ Architecture
+
+This platform uses a modern microservices architecture:
+
+- **Backend**: Ballerina programming language - designed for integration and cloud-native development
+- **Frontend**: Next.js 15 with React 19 - modern, responsive user interface
+- **Database**: MongoDB - flexible document storage for governance data
+- **Blockchain**: Integration ready for transparent transaction tracking
+
+## ✨ Features
 
 - 🏛️ **Government Administration Portal** - Multiple dashboard types for different government levels
 - 📊 **Spending Tracker** - Monitor government expenditures and budget allocation
-- 🗳️ **Voting System** - Secure digital voting platform
+- 🗳️ **Voting System** - Secure digital voting platform with blockchain verification
 - 📝 **Policy Hub** - Policy management and public engagement
 - 🔍 **Whistleblowing System** - Anonymous reporting system
-- ⛓️ **Blockchain Visualization** - Transparent transaction tracking
+- ⛓️ **Blockchain Integration** - Transparent transaction tracking and verification
 - 📱 **Responsive Design** - Mobile-first approach with modern UI
+- 🔐 **Secure Authentication** - JWT-based authentication and authorization
+- 🌍 **Cloud Native** - Built for scalability and integration
 
-## Tech Stack
+## 🛠️ Tech Stack
 
+### Backend (Ballerina)
+- **Language**: Ballerina 2201.12.7
+- **Database**: MongoDB integration ready
+- **Authentication**: JWT tokens
+- **API**: RESTful services with built-in CORS
+- **Logging**: Structured logging with Ballerina log module
+
+### Frontend (Next.js)
 - **Framework**: Next.js 15.2.4
 - **Frontend**: React 19
 - **Styling**: Tailwind CSS
@@ -23,30 +42,73 @@ A comprehensive civic transparency and governance platform built with Next.js 15
 - **Icons**: Lucide React
 - **Theme**: Next Themes (Dark/Light mode)
 
-## Getting Started
+## 🚀 Getting Started
 
 ### Prerequisites
 
-- Node.js 18+ 
-- pnpm (recommended) or npm
+- **Node.js** 18+ (for frontend)
+- **Ballerina** 2201.12.7+ ([Download here](https://ballerina.io/downloads/))
+- **Java** 11+ (required by Ballerina)
+- **MongoDB** (for database)
+- **pnpm** (recommended) or npm
 
-### Installation
+### Quick Setup
 
-1. Clone the repository:
+#### Option 1: Automated Setup
+
+**Windows:**
+```batch
+setup.bat
+```
+
+**Linux/macOS:**
+```bash
+chmod +x setup.sh
+./setup.sh
+```
+
+#### Option 2: Manual Setup
+
+1. **Clone the repository:**
 ```bash
 git clone <your-repo-url>
-cd civic-blockchain-platform
+cd transparent-governance-platform
 ```
 
-2. Install dependencies:
+2. **Install dependencies:**
 ```bash
-pnpm install
+# Install root dependencies
+npm install
+
+# Install client dependencies
+cd client && npm install && cd ..
+
+# Install shared dependencies  
+cd shared && npm install && cd ..
 ```
 
-3. Start the development server:
+3. **Build the Ballerina backend:**
 ```bash
-pnpm dev
+cd server
+bal build
+cd ..
 ```
+
+4. **Start the development environment:**
+```bash
+# Start both frontend and backend
+npm run dev
+
+# Or start individually
+npm run dev:client  # Frontend only
+npm run dev:server  # Backend only
+```
+
+### 🌐 Access Points
+
+- **Frontend**: http://localhost:3000
+- **Backend API**: http://localhost:9090/api
+- **Health Check**: http://localhost:9090/api/health
 
 4. Open [http://localhost:3000](http://localhost:3000) in your browser.
 

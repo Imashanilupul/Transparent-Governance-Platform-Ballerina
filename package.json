@@ -1,18 +1,28 @@
 {
-  "name": "civic-blockchain-platform",
+  "name": "transparent-governance-platform",
   "version": "0.1.0",
   "private": true,
-  "description": "A civic blockchain platform for transparency and governance",
+  "description": "A transparent governance platform with Ballerina backend and Next.js frontend",
   "scripts": {
-    "build": "next build",
-    "dev": "next dev",
-    "lint": "next lint",
-    "lint:fix": "next lint --fix",
-    "start": "next start",
-    "type-check": "tsc --noEmit",
+    "build": "npm run build:client && npm run build:server",
+    "build:client": "cd client && npm run build",
+    "build:server": "cd server && bal build",
+    "dev": "concurrently \"npm run dev:client\" \"npm run dev:server\"",
+    "dev:client": "cd client && npm run dev",
+    "dev:server": "cd server && bal run",
+    "start": "concurrently \"npm run start:client\" \"npm run start:server\"",
+    "start:client": "cd client && npm run start",
+    "start:server": "cd server && java -jar target/bin/transparent_governance_platform.jar",
+    "lint": "npm run lint:client",
+    "lint:client": "cd client && npm run lint",
+    "lint:fix": "cd client && npm run lint:fix",
+    "type-check": "cd client && npm run type-check",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "clean": "rm -rf .next out node_modules/.cache"
+    "clean": "npm run clean:client && npm run clean:server",
+    "clean:client": "cd client && npm run clean",
+    "clean:server": "cd server && rm -rf target",
+    "install:all": "npm install && cd client && npm install && cd ../shared && npm install"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",
@@ -71,6 +81,7 @@
     "@types/react-dom": "^19",
     "@typescript-eslint/eslint-plugin": "^8.38.0",
     "@typescript-eslint/parser": "^8.38.0",
+    "concurrently": "^9.0.1",
     "eslint": "^9.32.0",
     "eslint-config-next": "^15.4.4",
     "postcss": "^8.5",
@@ -78,5 +89,9 @@
     "prettier-plugin-tailwindcss": "^0.6.14",
     "tailwindcss": "^3.4.17",
     "typescript": "^5"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "ballerina": ">=2201.12.7"
   }
 }
