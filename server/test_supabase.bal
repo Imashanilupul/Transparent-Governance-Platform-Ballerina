@@ -98,7 +98,6 @@ public class SupabaseIntegrationTest {
             approval_authority: "Finance Ministry",
             budget_source: "Central Government",
             tracking_code: "EDU_2024_001",
-            budget_breakdown_json: "{\"primary\": 600000, \"secondary\": 400000}",
             created_by_user_id: userId,
             last_modified_by_user_id: userId,
             created_byId: userId,

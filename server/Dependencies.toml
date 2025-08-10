@@ -433,3 +433,9 @@ modules = [
 	{org = "user", packageName = "server_bal", moduleName = "server_bal.test_api_key"}
 ]
 
+[[tool]]
+id = "persist"
+org = "ballerina"
+name = "tool_persist"
+version = "0.0.0"
+

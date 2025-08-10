@@ -1,0 +1,24 @@
+# Ballerina Persist Configuration for Supabase PostgreSQL
+# This file configures the database connection for bal persist commands
+
+[[environments]]
+name = "supabase_db"
+
+[environments.datasource]
+provider = "postgresql"
+host = "aws-0-ap-south-1.pooler.supabase.com"
+port = 5432
+user = "postgres.hhnxsixgjcdhvzuwbmzf"
+password = "Anjana12345."
+database = "postgres"
+
+# Connection options for PostgreSQL
+[environments.datasource.options]
+ssl = {mode = "require"}
+connectTimeoutInSeconds = 10
+socketTimeoutInSeconds = 30
+
+# Migration settings
+[environments.migration]
+enabled = true
+migrationsPath = "persist/migrations"

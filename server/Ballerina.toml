@@ -37,3 +37,10 @@ groupId = "io.ballerina.stdlib"
 artifactId = "persist.sql-native"
 version = "1.6.0"
 
+[[tool.persist]]
+id = "generate-db-client"
+targetModule = "server_bal.supabase_db"
+options.datastore = "postgresql"
+filePath = "persist/model.bal"
+
+
