@@ -4,6 +4,7 @@ import ballerina/time;
 
 # Environment variables configuration
 configurable int port = ?;
+configurable int petitionPort = ?;
 configurable string supabaseUrl = ?;
 configurable string supabaseServiceRoleKey = ?;
 
@@ -47,6 +48,10 @@ service /api on apiListener {
             "version": "2.0.0",
             "status": "Running",
             "environment": "Configured from environment variables",
+            "ports": {
+                "ballerina_backend": port,
+                "express_backend": petitionPort
+            },
             "database": {
                 "type": "PostgreSQL",
                 "provider": "Supabase",
@@ -848,7 +853,8 @@ public function main() returns error? {
     // Initialize database connection at startup
     check initializeDatabase();
     
-    log:printInfo("🌐 Server started on port " + port.toString());
+    log:printInfo("🌐 Ballerina Backend started on port " + port.toString());
+    log:printInfo("📌 Express Backend configured for port " + petitionPort.toString());
     log:printInfo("📋 Available endpoints:");
     log:printInfo("  ➤ Health check: http://localhost:" + port.toString() + "/api/health");
     log:printInfo("  ➤ Server status: http://localhost:" + port.toString() + "/api/status");
