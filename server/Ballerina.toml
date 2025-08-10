@@ -8,6 +8,16 @@ distribution = "2201.12.7"
 observabilityIncluded = true
 
 [[dependency]]
+org = "ballerina"
+name = "persist"
+version = "1.4.0"
+
+[[dependency]]
+org = "ballerinax"
+name = "persist.postgresql"
+version = "1.4.0"
+
+[[dependency]]
 org = "ballerinax"
 name = "postgresql"
 version = "1.13.0"
@@ -16,3 +26,14 @@ version = "1.13.0"
 org = "ballerinax"
 name = "postgresql.driver"
 version = "1.6.0"
+
+[[dependency]]
+org = "ballerina"
+name = "uuid"
+version = "1.10.0"
+
+[[platform.java21.dependency]]
+groupId = "io.ballerina.stdlib"
+artifactId = "persist.sql-native"
+version = "1.6.0"
+

@@ -2,7 +2,6 @@ import server_bal.categories;
 import server_bal.policy;
 
 import ballerina/http;
-import ballerina/jwt;
 import ballerina/log;
 import ballerina/time;
 
@@ -303,33 +302,33 @@ service /auth on newListener {
     }
 
     resource function get isauthorized/[string address](http:Caller caller, http:Request req) returns error? {
-    json response = check web3Service->get("/auth/is-authorized/" + address);
-    map<anydata> respMap = check response.cloneWithType(map<anydata>);
-    boolean isVerified = respMap["isAuthorized"] is boolean ? <boolean>respMap["isAuthorized"] : false;
+        json response = check web3Service->get("/auth/is-authorized/" + address);
+        map<anydata> respMap = check response.cloneWithType();
+        boolean isVerified = respMap["isAuthorized"] is boolean ? <boolean>respMap["isAuthorized"] : false;
 
-    if isVerified {
-        // JWT payload
-        map<anydata> claims = {
-            iss: "TransparentGovernancePlatform",
-            sub: address,
-            aud: "TransparentGovernancePlatform",
-            exp: time:utcNow().seconds + 3600 // 1 hour expiry
-        };
-        // Encode JWT
-        string token = check jwt:encode(claims, "your-secret-key", jwt:HS256);
-        check caller->respond({
-            address: address,
-            verified: true,
-            token: token
-        });
-    } else {
-        check caller->respond({
-            address: address,
-            verified: false,
-            token: ()
-        });
+        if isVerified {
+            // Simple JWT token generation using base64 encoding
+            [int, decimal] currentTime = time:utcNow();
+            int expiryTime = currentTime[0] + 3600;
+            string payload = string `{"address":"${address}","verified":true,"exp":${expiryTime}}`;
+            byte[] payloadBytes = payload.toBytes();
+            string token = payloadBytes.toBase64();
+            
+            json authResponse = {
+                address: address,
+                verified: true,
+                token: token
+            };
+            check caller->respond(authResponse);
+        } else {
+            json authResponse = {
+                address: address,
+                verified: false,
+                token: ()
+            };
+            check caller->respond(authResponse);
+        }
     }
-}
 
     resource function get health() returns string {
         return "Auth service is running!";

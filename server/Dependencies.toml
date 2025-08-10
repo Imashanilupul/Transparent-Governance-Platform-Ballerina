@@ -116,6 +116,9 @@ modules = [
 org = "ballerina"
 name = "jballerina.java"
 version = "0.0.0"
+modules = [
+	{org = "ballerina", packageName = "jballerina.java", moduleName = "jballerina.java"}
+]
 
 [[package]]
 org = "ballerina"
@@ -272,6 +275,31 @@ dependencies = [
 
 [[package]]
 org = "ballerina"
+name = "persist"
+version = "1.6.0"
+dependencies = [
+	{org = "ballerina", name = "jballerina.java"}
+]
+modules = [
+	{org = "ballerina", packageName = "persist", moduleName = "persist"}
+]
+
+[[package]]
+org = "ballerina"
+name = "sql"
+version = "1.16.0"
+dependencies = [
+	{org = "ballerina", name = "io"},
+	{org = "ballerina", name = "jballerina.java"},
+	{org = "ballerina", name = "lang.object"},
+	{org = "ballerina", name = "time"}
+]
+modules = [
+	{org = "ballerina", packageName = "sql", moduleName = "sql"}
+]
+
+[[package]]
+org = "ballerina"
 name = "task"
 version = "2.11.0"
 dependencies = [
@@ -323,6 +351,9 @@ dependencies = [
 	{org = "ballerina", name = "lang.int"},
 	{org = "ballerina", name = "time"}
 ]
+modules = [
+	{org = "ballerina", packageName = "uuid", moduleName = "uuid"}
+]
 
 [[package]]
 org = "ballerinai"
@@ -337,21 +368,68 @@ modules = [
 ]
 
 [[package]]
+org = "ballerinax"
+name = "persist.sql"
+version = "1.6.0"
+dependencies = [
+	{org = "ballerina", name = "jballerina.java"},
+	{org = "ballerina", name = "log"},
+	{org = "ballerina", name = "persist"},
+	{org = "ballerina", name = "sql"},
+	{org = "ballerina", name = "time"}
+]
+modules = [
+	{org = "ballerinax", packageName = "persist.sql", moduleName = "persist.sql"}
+]
+
+[[package]]
+org = "ballerinax"
+name = "postgresql"
+version = "1.13.0"
+dependencies = [
+	{org = "ballerina", name = "crypto"},
+	{org = "ballerina", name = "io"},
+	{org = "ballerina", name = "jballerina.java"},
+	{org = "ballerina", name = "sql"},
+	{org = "ballerina", name = "time"}
+]
+modules = [
+	{org = "ballerinax", packageName = "postgresql", moduleName = "postgresql"}
+]
+
+[[package]]
+org = "ballerinax"
+name = "postgresql.driver"
+version = "1.6.0"
+modules = [
+	{org = "ballerinax", packageName = "postgresql.driver", moduleName = "postgresql.driver"}
+]
+
+[[package]]
 org = "user"
 name = "server_bal"
 version = "0.1.0"
 dependencies = [
 	{org = "ballerina", name = "http"},
 	{org = "ballerina", name = "io"},
+	{org = "ballerina", name = "jballerina.java"},
 	{org = "ballerina", name = "log"},
+	{org = "ballerina", name = "persist"},
+	{org = "ballerina", name = "sql"},
 	{org = "ballerina", name = "test"},
 	{org = "ballerina", name = "time"},
-	{org = "ballerinai", name = "observe"}
+	{org = "ballerina", name = "uuid"},
+	{org = "ballerinai", name = "observe"},
+	{org = "ballerinax", name = "persist.sql"},
+	{org = "ballerinax", name = "postgresql"},
+	{org = "ballerinax", name = "postgresql.driver"}
 ]
 modules = [
 	{org = "user", packageName = "server_bal", moduleName = "server_bal"},
 	{org = "user", packageName = "server_bal", moduleName = "server_bal.categories"},
+	{org = "user", packageName = "server_bal", moduleName = "server_bal.jwt"},
 	{org = "user", packageName = "server_bal", moduleName = "server_bal.policy"},
+	{org = "user", packageName = "server_bal", moduleName = "server_bal.supabase_db"},
 	{org = "user", packageName = "server_bal", moduleName = "server_bal.test_api_key"}
 ]
 
