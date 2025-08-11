@@ -2,14 +2,14 @@
 
 import { useState } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { AdminOverview } from "@/components/admin/admin-overview"
-import { CategoryManagement } from "@/components/admin/category-management"
-import { ProjectManagement } from "@/components/admin/project-management"
-import { ProposalManagement } from "@/components/admin/proposal-management"
-import { PolicyManagement } from "@/components/admin/policy-management"
-import { PetitionManagement } from "@/components/admin/petition-management"
-import { ReportManagement } from "@/components/admin/report-management"
-import { UserManagement } from "@/components/admin/user-management"
+import { AdminOverview } from "@/components/ui/admin/admin-overview"
+import { CategoryManagement } from "@/components/ui/admin/category-management"
+import { ProjectManagement } from "@/components/ui/admin/project-management"
+import { ProposalManagement } from "@/components/ui/admin/proposal-management"
+import { PolicyManagement } from "@/components/ui/admin/policy-management"
+import { PetitionManagement } from "@/components/ui/admin/petition-management"
+import { ReportManagement } from "@/components/ui/admin/report-management"
+import { UserManagement } from "@/components/ui/admin/user-management"
 import {
   LayoutDashboard,
   DollarSign,
