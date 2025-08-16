@@ -16,7 +16,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Progress } from "@/components/ui/progress"
 import { useToast } from "@/hooks/use-toast"
-import { useAuth } from "@/context/AuthContext"
+import { useLegacyAuth } from "@/context/CombinedAuthContext" // Updated import
 import {
   Shield,
   AlertTriangle,
@@ -52,7 +52,7 @@ interface WhistleblowingSystemProps {
 
 export function WhistleblowingSystem({ walletAddress }: WhistleblowingSystemProps) {
   const { toast } = useToast()
-  const { address, verified } = useAuth() // Get auth state
+  const { address, verified } = useLegacyAuth() // Get auth state
 
   const [reportForm, setReportForm] = useState({
     category: "",

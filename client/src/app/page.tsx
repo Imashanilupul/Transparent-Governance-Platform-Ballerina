@@ -25,10 +25,12 @@ import { RegistrationDialog } from "@/components/registration-dialog"
 import SignUpPage from "@/components/signup"
 import { userService } from "@/services/user"
 import { categoryService } from "@/services/category"
-import { useAuth } from "@/context/AuthContext"
+import { useAuth } from "@/context/CombinedAuthContext"
+import { AuthStatus } from "@/components/AuthStatus"
+import { AuthDebug } from "@/components/AuthDebug"
 
 export default function CivicPlatform() {
-  const { address } = useAuth()
+  const { walletAddress, isAsgardeoAuthenticated } = useAuth()
   const [activeTab, setActiveTab] = useState("overview")
   const [userCount, setUserCount] = useState<number>(0)
   const [userChangePct, setUserChangePct] = useState<number>(0)
@@ -142,6 +144,18 @@ export default function CivicPlatform() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-amber-50 to-green-50">
       <div className="container mx-auto p-6">
         <div className="fixed top-6 right-6 z-50 flex gap-3">
+          {isAsgardeoAuthenticated ? (
+            <AuthStatus />
+          ) : (
+            <div className="flex gap-2">
+              <a 
+                href="/auth/signin"
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              >
+                Sign In
+              </a>
+            </div>
+          )}
           <RegistrationDialog />
           <ConnectButton />
         </div>
@@ -278,9 +292,10 @@ export default function CivicPlatform() {
           </TabsContent>
 
           <TabsContent value="whistleblowing">
-            <WhistleblowingSystem walletAddress={address} />
+            <WhistleblowingSystem walletAddress={walletAddress} />
           </TabsContent>
         </Tabs>
+        <AuthDebug />
       </div>
       {/* Footer */}
       <footer className="mt-12 border-t bg-slate-50 py-8">
