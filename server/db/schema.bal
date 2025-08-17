@@ -11,6 +11,8 @@ public function setupTables(postgresql:Client dbClient) returns error? {
     
     // Create tables in dependency order
     check createUsersTable(dbClient);
+    check createAdminRolesTable(dbClient);
+    check createAdminsTable(dbClient);
     check createCategoriesTable(dbClient);
     check createProjectsTable(dbClient);
     check createTransactionsTable(dbClient);
@@ -18,6 +20,7 @@ public function setupTables(postgresql:Client dbClient) returns error? {
     check createPoliciesTable(dbClient);
     check createPolicyCommentsTable(dbClient);
     check createReportsTable(dbClient);
+    check createReportAssignmentsTable(dbClient);
     check createPetitionsTable(dbClient);
     check createPetitionActivitiesTable(dbClient);
     
@@ -29,9 +32,9 @@ public function setupTables(postgresql:Client dbClient) returns error? {
 # + dbClient - Database client connection
 # + return - True if all core tables exist, false otherwise, or error
 public function tablesExist(postgresql:Client dbClient) returns boolean|error {
-    string[] requiredTables = ["users", "categories", "projects", "transactions", 
+    string[] requiredTables = ["users", "admin_roles", "admins", "categories", "projects", "transactions", 
                                "proposals", "policies", "policy_comments", 
-                               "reports", "petitions", "petition_activities"];
+                               "reports", "report_assignments", "petitions", "petition_activities"];
     
     foreach string tableName in requiredTables {
         stream<record {|boolean exists;|}, sql:Error?> resultStream = dbClient->query(`
@@ -72,6 +75,79 @@ function createUsersTable(postgresql:Client dbClient) returns error? {
         )
     `);
     log:printInfo("Users table ready");
+}
+
+# Create admin roles table
+#
+# + dbClient - Database client connection
+# + return - Error if table creation fails
+function createAdminRolesTable(postgresql:Client dbClient) returns error? {
+    _ = check dbClient->execute(`
+        CREATE TABLE IF NOT EXISTS admin_roles (
+            id SERIAL PRIMARY KEY,
+            role_name VARCHAR(100) NOT NULL UNIQUE,
+            institution VARCHAR(255) NOT NULL,
+            description TEXT,
+            permissions JSONB NOT NULL DEFAULT '[]',
+            ministry_level VARCHAR(100),
+            is_active BOOLEAN DEFAULT true,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    `);
+    
+    // Create indexes for better performance
+    _ = check dbClient->execute(`
+        CREATE INDEX IF NOT EXISTS idx_admin_roles_institution 
+        ON admin_roles(institution)
+    `);
+    
+    _ = check dbClient->execute(`
+        CREATE INDEX IF NOT EXISTS idx_admin_roles_active 
+        ON admin_roles(is_active)
+    `);
+    
+    log:printInfo("Admin roles table ready");
+}
+
+# Create admins table
+#
+# + dbClient - Database client connection
+# + return - Error if table creation fails
+function createAdminsTable(postgresql:Client dbClient) returns error? {
+    _ = check dbClient->execute(`
+        CREATE TABLE IF NOT EXISTS admins (
+            id SERIAL PRIMARY KEY,
+            user_name VARCHAR(255) NOT NULL,
+            email VARCHAR(255) UNIQUE NOT NULL,
+            full_name VARCHAR(255),
+            phone VARCHAR(20),
+            department VARCHAR(255),
+            role_id INTEGER REFERENCES admin_roles(id) ON DELETE SET NULL,
+            is_active BOOLEAN DEFAULT true,
+            last_login TIMESTAMP,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    `);
+    
+    // Create indexes for better performance
+    _ = check dbClient->execute(`
+        CREATE INDEX IF NOT EXISTS idx_admins_email 
+        ON admins(email)
+    `);
+    
+    _ = check dbClient->execute(`
+        CREATE INDEX IF NOT EXISTS idx_admins_role_id 
+        ON admins(role_id)
+    `);
+    
+    _ = check dbClient->execute(`
+        CREATE INDEX IF NOT EXISTS idx_admins_active 
+        ON admins(is_active)
+    `);
+    
+    log:printInfo("Admins table ready");
 }
 
 # Create categories table
@@ -213,6 +289,8 @@ function createReportsTable(postgresql:Client dbClient) returns error? {
             report_id SERIAL PRIMARY KEY,
             report_title VARCHAR(255) NOT NULL,
             description TEXT,
+            category VARCHAR(100),
+            target_admin_role_id INTEGER REFERENCES admin_roles(id) ON DELETE SET NULL,
             priority VARCHAR(50) NOT NULL DEFAULT 'MEDIUM' 
                 CHECK (priority IN ('LOW', 'MEDIUM', 'HIGH', 'CRITICAL')),
             assigned_to VARCHAR(255),
@@ -226,7 +304,57 @@ function createReportsTable(postgresql:Client dbClient) returns error? {
             CHECK (resolved_time IS NULL OR resolved_time >= created_time)
         )
     `);
+    
+    // Create indexes for better performance
+    _ = check dbClient->execute(`
+        CREATE INDEX IF NOT EXISTS idx_reports_target_admin_role 
+        ON reports(target_admin_role_id)
+    `);
+    
+    _ = check dbClient->execute(`
+        CREATE INDEX IF NOT EXISTS idx_reports_category 
+        ON reports(category)
+    `);
+    
     log:printInfo("Reports table ready");
+}
+
+# Create report assignments table
+#
+# + dbClient - Database client connection
+# + return - Error if table creation fails
+function createReportAssignmentsTable(postgresql:Client dbClient) returns error? {
+    _ = check dbClient->execute(`
+        CREATE TABLE IF NOT EXISTS report_assignments (
+            id SERIAL PRIMARY KEY,
+            report_id INTEGER REFERENCES reports(report_id) ON DELETE CASCADE,
+            admin_role_id INTEGER REFERENCES admin_roles(id) ON DELETE SET NULL,
+            assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            assigned_by INTEGER REFERENCES admins(id) ON DELETE SET NULL,
+            status VARCHAR(50) DEFAULT 'ASSIGNED' 
+                CHECK (status IN ('ASSIGNED', 'IN_PROGRESS', 'COMPLETED', 'REJECTED')),
+            notes TEXT,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    `);
+    
+    // Create indexes for better performance
+    _ = check dbClient->execute(`
+        CREATE INDEX IF NOT EXISTS idx_report_assignments_report_id 
+        ON report_assignments(report_id)
+    `);
+    
+    _ = check dbClient->execute(`
+        CREATE INDEX IF NOT EXISTS idx_report_assignments_admin_role_id 
+        ON report_assignments(admin_role_id)
+    `);
+    
+    _ = check dbClient->execute(`
+        CREATE INDEX IF NOT EXISTS idx_report_assignments_status 
+        ON report_assignments(status)
+    `);
+    
+    log:printInfo("Report assignments table ready");
 }
 
 # Create petitions table
@@ -242,12 +370,20 @@ function createPetitionsTable(postgresql:Client dbClient) returns error? {
             required_signature_count INTEGER NOT NULL,
             signature_count INTEGER DEFAULT 0,
             creator_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+            assigned_admin_role_id INTEGER REFERENCES admin_roles(id) ON DELETE SET NULL,
             status VARCHAR(50) DEFAULT 'ACTIVE',
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             deadline TIMESTAMP
         )
     `);
+    
+    // Create indexes for better performance
+    _ = check dbClient->execute(`
+        CREATE INDEX IF NOT EXISTS idx_petitions_assigned_admin_role 
+        ON petitions(assigned_admin_role_id)
+    `);
+    
     log:printInfo("Petitions table ready");
 }
 

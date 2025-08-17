@@ -8,6 +8,7 @@ import server_bal.users;
 import server_bal.petitions;
 import server_bal.petition_activities;
 import server_bal.policy_comments;
+import server_bal.admins;
 
 import ballerina/http;
 import ballerina/log;
@@ -38,6 +39,7 @@ users:UsersService usersService = new (supabaseClient, port, supabaseUrl, supaba
 petitions:PetitionsService petitionsService = new (supabaseClient, port, supabaseUrl, supabaseServiceRoleKey);
 petition_activities:PetitionActivitiesService petitionActivitiesService = new (supabaseClient, port, supabaseUrl, supabaseServiceRoleKey);
 policy_comments:PolicyCommentsService policyCommentsService = new (supabaseClient, port, supabaseUrl, supabaseServiceRoleKey);
+admins:AdminsService adminsService = new (supabaseClient, port, supabaseUrl, supabaseServiceRoleKey);
 
 
 # Main API service with CORS configuration
@@ -150,7 +152,16 @@ service /api on apiListener {
                 "GET /api/policycomments/recent - Get recent comments",
                 "POST /api/policycomments/{id}/like - Like a comment",
                 "POST /api/policycomments/{id}/unlike - Unlike a comment",
-                "GET /api/policycomments/top/{limit} - Get top liked comments"
+                "GET /api/policycomments/top/{limit} - Get top liked comments",
+                "GET /api/admin/roles - List all admin roles",
+                "POST /api/admin/roles - Create a new admin role", 
+                "GET /api/admin/roles/{id}/admins - Get admins by role",
+                "GET /api/admin/admins - List all admins",
+                "POST /api/admin/admins - Create a new admin",
+                "PUT /api/admin/admins/{id} - Update admin by ID",
+                "DELETE /api/admin/admins/{id} - Delete admin by ID",
+                "POST /api/admin/authenticate - Authenticate admin by email",
+                "GET /api/admin/admins/{id}/permissions/{permission} - Check admin permission"
             ],
             "features": [
                 "Environment-based configuration",
@@ -163,6 +174,10 @@ service /api on apiListener {
                 "Petition management",
                 "Petition activities tracking",
                 "Policy comments and engagement",
+                "Super admin management",
+                "Role-based access control",
+                "Admin role permissions",
+                "Intelligent report/petition routing",
                 "Database health monitoring"
             ],
             "timestamp": currentTime[0]
@@ -892,11 +907,14 @@ service /api on apiListener {
 
         // Extract optional fields
         string? description = payload.description is string ? check payload.description : ();
+        string? category = payload.category is string ? check payload.category : ();
         string priority = payload.priority is string ? check payload.priority : "MEDIUM";
         string? assignedTo = payload.assigned_to is string ? check payload.assigned_to : ();
+        int? targetAdminRoleId = payload.target_admin_role_id is int ? check payload.target_admin_role_id : ();
         int? userId = payload.user_id is int ? check payload.user_id : ();
+        string? walletAddress = payload.wallet_address is string ? check payload.wallet_address : ();
 
-        return reportsService.createReport(reportTitle, evidenceHash, description, priority, assignedTo, userId);
+        return reportsService.createReport(reportTitle, evidenceHash, description, category, priority, assignedTo, targetAdminRoleId, userId, walletAddress);
     }
 
     # Update report by ID
@@ -1090,6 +1108,13 @@ service /api on apiListener {
                 }
             }
 
+            int? assignedAdminRoleId = ();
+            if payload.hasKey("assigned_admin_role_id") {
+                if payload["assigned_admin_role_id"] is int {
+                    assignedAdminRoleId = check payload["assigned_admin_role_id"].ensureType(int);
+                }
+            }
+
             string? deadline = ();
             if payload.hasKey("deadline") {
                 if payload["deadline"] is string {
@@ -1097,7 +1122,7 @@ service /api on apiListener {
                 }
             }
 
-            return petitionsService.createPetition(title, description, requiredSignatureCount, creatorId, deadline);
+            return petitionsService.createPetition(title, description, requiredSignatureCount, creatorId, assignedAdminRoleId, deadline);
         } else {
             return {
                 "success": false,
@@ -1446,6 +1471,94 @@ service /api on apiListener {
     resource function get policycomments/top/[int 'limit]() returns json|error {
         log:printInfo("Get top liked comments endpoint called with limit: " + 'limit.toString());
         return policyCommentsService.getTopLikedComments('limit);
+    }
+
+    # ===== ADMIN MANAGEMENT ENDPOINTS =====
+
+    # Get all admin roles
+    #
+    # + return - Admin roles list or error
+    resource function get admin/roles() returns json|error {
+        log:printInfo("Get all admin roles endpoint called");
+        return adminsService.getAllAdminRoles();
+    }
+
+    # Create a new admin role
+    #
+    # + request - HTTP request containing admin role data
+    # + return - Created admin role data or error
+    resource function post admin/roles(http:Request request) returns json|error {
+        log:printInfo("Create admin role endpoint called");
+        json payload = check request.getJsonPayload();
+        return adminsService.createAdminRole(payload);
+    }
+
+    # Get all admins
+    #
+    # + return - Admins list or error
+    resource function get admin/admins() returns json|error {
+        log:printInfo("Get all admins endpoint called");
+        return adminsService.getAllAdmins();
+    }
+
+    # Create a new admin
+    #
+    # + request - HTTP request containing admin data
+    # + return - Created admin data or error
+    resource function post admin/admins(http:Request request) returns json|error {
+        log:printInfo("Create admin endpoint called");
+        json payload = check request.getJsonPayload();
+        return adminsService.createAdmin(payload);
+    }
+
+    # Update admin by ID
+    #
+    # + request - HTTP request containing updated admin data
+    # + adminId - Admin ID to update
+    # + return - Updated admin data or error
+    resource function put admin/admins/[int adminId](http:Request request) returns json|error {
+        log:printInfo("Update admin endpoint called for ID: " + adminId.toString());
+        json payload = check request.getJsonPayload();
+        return adminsService.updateAdmin(adminId, payload);
+    }
+
+    # Delete admin by ID
+    #
+    # + adminId - Admin ID to delete
+    # + return - Success message or error
+    resource function delete admin/admins/[int adminId]() returns json|error {
+        log:printInfo("Delete admin endpoint called for ID: " + adminId.toString());
+        return adminsService.deleteAdmin(adminId);
+    }
+
+    # Authenticate admin by email
+    #
+    # + request - HTTP request containing authentication data
+    # + return - Authentication result or error
+    resource function post admin/authenticate(http:Request request) returns json|error {
+        log:printInfo("Admin authentication endpoint called");
+        json payload = check request.getJsonPayload();
+        string email = check payload.email;
+        return adminsService.authenticateAdmin(email);
+    }
+
+    # Check admin permission
+    #
+    # + adminId - Admin ID to check
+    # + permission - Permission to check
+    # + return - Permission check result or error
+    resource function get admin/admins/[int adminId]/permissions/[string permission]() returns json|error {
+        log:printInfo("Check admin permission endpoint called for admin " + adminId.toString() + " and permission " + permission);
+        return adminsService.checkAdminPermission(adminId, permission);
+    }
+
+    # Get admins by role
+    #
+    # + roleId - Role ID to filter by
+    # + return - Admins list for the role or error
+    resource function get admin/roles/[int roleId]/admins() returns json|error {
+        log:printInfo("Get admins by role endpoint called for role ID: " + roleId.toString());
+        return adminsService.getAdminsByRole(roleId);
     }
 
     # Auth endpoints

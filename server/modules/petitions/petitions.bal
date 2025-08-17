@@ -48,7 +48,7 @@ public class PetitionsService {
         do {
             map<string> headers = self.getHeaders();
 
-            http:Response response = check self.supabaseClient->get("/rest/v1/petitions?select=*&order=created_at.desc", headers);
+            http:Response response = check self.supabaseClient->get("/rest/v1/petitions?select=*,admin_roles(role_name,institution)&order=created_at.desc", headers);
             
             if response.statusCode != 200 {
                 return error("Failed to get petitions: " + response.statusCode.toString());
@@ -115,9 +115,10 @@ public class PetitionsService {
     # + description - Petition description
     # + requiredSignatureCount - Required signature count
     # + creatorId - Creator user ID
+    # + assignedAdminRoleId - Assigned admin role ID
     # + deadline - Petition deadline
     # + return - Created petition data or error
-    public function createPetition(string title, string description, int requiredSignatureCount, int? creatorId = (), string? deadline = ()) returns json|error {
+    public function createPetition(string title, string description, int requiredSignatureCount, int? creatorId = (), int? assignedAdminRoleId = (), string? deadline = ()) returns json|error {
         do {
             // Validate input
             if title.trim().length() == 0 {
@@ -141,6 +142,10 @@ public class PetitionsService {
             // Add optional fields
             if creatorId is int {
                 payload = check payload.mergeJson({"creator_id": creatorId});
+            }
+            
+            if assignedAdminRoleId is int {
+                payload = check payload.mergeJson({"assigned_admin_role_id": assignedAdminRoleId});
             }
             
             if deadline is string && deadline.trim().length() > 0 {

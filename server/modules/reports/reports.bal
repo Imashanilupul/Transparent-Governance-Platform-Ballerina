@@ -48,7 +48,7 @@ public class ReportsService {
         do {
             map<string> headers = self.getHeaders();
 
-            http:Response response = check self.supabaseClient->get("/rest/v1/reports?select=*&order=created_time.desc", headers);
+            http:Response response = check self.supabaseClient->get("/rest/v1/reports?select=*,admin_roles(role_name,institution)&order=created_time.desc", headers);
             
             if response.statusCode != 200 {
                 return error("Failed to get reports: " + response.statusCode.toString());
@@ -114,12 +114,14 @@ public class ReportsService {
     # + reportTitle - Report title
     # + evidenceHash - Evidence hash for the report
     # + description - Report description
+    # + category - Report category
     # + priority - Report priority (LOW, MEDIUM, HIGH, CRITICAL)
     # + assignedTo - Person assigned to handle the report
+    # + targetAdminRoleId - Target admin role ID for assignment
     # + userId - User ID who created the report
     # + walletAddress - Wallet address of the user who created the report
     # + return - Created report data or error
-    public function createReport(string reportTitle, string evidenceHash, string? description = (), string priority = "MEDIUM", string? assignedTo = (), int? userId = (), string? walletAddress = ()) returns json|error {
+    public function createReport(string reportTitle, string evidenceHash, string? description = (), string? category = (), string priority = "MEDIUM", string? assignedTo = (), int? targetAdminRoleId = (), int? userId = (), string? walletAddress = ()) returns json|error {
         do {
             // Validate input
             if reportTitle.trim().length() == 0 {
@@ -154,8 +156,16 @@ public class ReportsService {
                 payload = check payload.mergeJson({"description": description});
             }
             
+            if category is string && category.trim().length() > 0 {
+                payload = check payload.mergeJson({"category": category});
+            }
+            
             if assignedTo is string && assignedTo.trim().length() > 0 {
                 payload = check payload.mergeJson({"assigned_to": assignedTo});
+            }
+            
+            if targetAdminRoleId is int {
+                payload = check payload.mergeJson({"target_admin_role_id": targetAdminRoleId});
             }
             
             if userId is int {
