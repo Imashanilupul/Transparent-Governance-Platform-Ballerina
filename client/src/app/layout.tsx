@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import "../styles/globals.css"
 import ContextProvider from "@/components/walletConnect/context"
 import { AuthProvider } from "@/context/AuthContext"
+import { Web3AuthProvider } from "@/providers/Web3AuthProvider"
 import { Toaster } from "sonner"
 
 export const metadata: Metadata = {
@@ -20,17 +21,19 @@ export default function RootLayout({
       <body>
         <AuthProvider>
           <ContextProvider>
-            {children}
-            <Toaster 
-              position="top-right" 
-              toastOptions={{
-                style: {
-                  background: 'white',
-                  border: '1px solid #e2e8f0',
-                  color: '#0f172a',
-                },
-              }}
-            />
+            <Web3AuthProvider>
+              {children}
+              <Toaster 
+                position="top-right" 
+                toastOptions={{
+                  style: {
+                    background: 'white',
+                    border: '1px solid #e2e8f0',
+                    color: '#0f172a',
+                  },
+                }}
+              />
+            </Web3AuthProvider>
           </ContextProvider>
         </AuthProvider>
       </body>
